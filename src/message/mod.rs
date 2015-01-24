@@ -5,12 +5,10 @@ use std::io;
 use std::io::net::pipe::UnixStream;
 use std::io::IoResult;
 
-pub trait Message:Copy {
-    fn print_mesg(&self);
-    fn get_stream(&self) -> IoResult<UnixStream>;
+pub trait Message {
 } 
 
-fn mesg_bytes<'a, T: Message>(mesg: T) -> &'a [u8] {
+pub fn mesg_bytes<'a, T: Message>(mesg: T) -> &'a [u8] {
     let const_ptr: *const T = &mesg;
     let mesg_as_bytes: *const u8 = const_ptr as *const u8;
 
@@ -24,11 +22,4 @@ fn mesg_bytes<'a, T: Message>(mesg: T) -> &'a [u8] {
     };
     return bytes_mesg;
 
-}
-pub fn send_message<M: Message>(mesg: M) ->IoResult<()> {
-
-    let m_bytes = mesg_bytes(mesg);
-    let mut stream = mesg.get_stream().unwrap();
-    let result = stream.write(m_bytes); 
-    return result;
 }

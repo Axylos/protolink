@@ -1,6 +1,7 @@
 extern crate protolink;
 use protolink::uni_pipe;
 use protolink::uni_pipe::{ TestStruct, Client, Host};
+use protolink::uni_pipe::client::UniMesg;
 
 #[test]
 fn it_works() {
@@ -13,18 +14,12 @@ fn uni_pipe_functions_are_there() {
     assert_eq!(uni_pipe::host::collect_messages(), "it works");
 }
 
-fn uni_pipe_structs_are_there() {
-    let ts = TestStruct { attr: true };
-    match ts.attr {
-        true => assert!(true),
-        false => assert!(false)
-    }
-}
+
 
 #[cfg(test)]
 fn can_send_and_receive() {
     //define config attrs
-    let msg = "a message";
+    let msg = UniMesg::new("some text".to_string()); 
     let path = "/var/run/rust";
 
     //initialize and connect server and client
