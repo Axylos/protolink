@@ -5,7 +5,7 @@ use std::io;
 use std::io::net::pipe::UnixStream;
 use std::io::IoResult;
 
-pub trait Message {
+pub trait Message:Copy {
     fn print_mesg(&self);
     fn get_stream(&self) -> IoResult<UnixStream>;
 } 
@@ -14,20 +14,21 @@ fn mesg_bytes<'a, T: Message>(mesg: T) -> &'a [u8] {
     let const_ptr: *const T = &mesg;
     let mesg_as_bytes: *const u8 = const_ptr as *const u8;
 
-    let raw_bytes = std::raw::Slice {
+    let raw_bytes = Slice {
         data: mesg_as_bytes,
-        len: std::mem::size_of::<T>()
+        len: mem::size_of::<T>()
     };
 
-    //let bytes_mesg: &[u8] = unsafe {
-        //std::mem::transmute(std::raw::Slice {
-    //            };
-    //return bytes_mesg;
+    let bytes_mesg: &[u8] = unsafe {
+        mem::transmute(raw_bytes)
+    };
+    return bytes_mesg;
 
 }
 pub fn send_message<M: Message>(mesg: M) ->IoResult<()> {
 
     let m_bytes = mesg_bytes(mesg);
-    let stream = mesg.get_stream().unwrap();
-    return stream.write(m_bytes); 
+    let mut stream = mesg.get_stream().unwrap();
+    let result = stream.write(m_bytes); 
+    return result;
 }
