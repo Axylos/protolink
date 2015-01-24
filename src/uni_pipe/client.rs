@@ -18,10 +18,7 @@ impl Client {
         }
     }
 
-    fn send_message<M: Message>(&self, mesg: M) ->IoResult {
-        byte_mesg = mesg.text.as_bytes();
-        return self.stream.write(byte_mesg); 
-    }
+    
             
 
 }
