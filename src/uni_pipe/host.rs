@@ -5,6 +5,8 @@ use std::io::{FileType, IoResult, Listener,
 use message::{Message, mesg_bytes};
 use uni_pipe::uni_mesg::UniMesg;
 use std::path::posix::Path;
+use std::thread::Thread;
+use std::sync::mpsc;
 
 
 #[derive(Clone)]
@@ -22,21 +24,30 @@ impl Host {
         }
     }
 
+    fn boot(&self, tx: mpsc::Sender<UniMesg>) {
+        Thread::spawn(move|| {
+            let listener = UnixListener::bind(self.pipe_path).unwrap();
+            let mut acceptor = listener.listen().unwrap();
+            for mut client in acceptor.incoming() {
+
+                let reader = BufferedReader::new(client.unwrap());
+                let text = reader.read_until(b'\x04').unwrap();
+                let dest = reader.read_until(b'\x01').unwrap().container_as_bytes();
+                let rendered_dest = ::std::num::from_u8(dest[0]).unwrap();
+                let mesg = UniMesg { 
+                    mesg: text.container_as_str().unwrap().to_string(), 
+                    dest: rendered_dest
+                };
+                //tx.send(mesg).unwrap()
+            }
+
+        });
+    }
+
+
+
     fn get_one_message(&self) -> UniMesg{
         //let mut stream = self.listener.clone();
-        let listener = UnixListener::bind(self.pipe_path).unwrap();
-        let mut acceptor = listener.listen().unwrap();
-        for mut client in acceptor.incoming() {
-            let reader = BufferedReader::new(client.unwrap());
-            let text = reader.read_until(b'\x04').unwrap();
-            let dest = reader.read_until(b'\x01').unwrap().container_as_bytes();
-            let rendered_dest = ::std::num::from_u8(dest[0]).unwrap();
-
-            return UniMesg { 
-                mesg: text.container_as_str().unwrap().to_string(), 
-                dest: rendered_dest
-            }
-        }
     }
 }
 
