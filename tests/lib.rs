@@ -1,7 +1,7 @@
 extern crate protolink;
 use protolink::uni_pipe;
-use protolink::uni_pipe::{ TestStruct, Client, Host};
-use protolink::uni_pipe::client::UniMesg;
+use protolink::uni_pipe::{ Client, Host};
+use protolink::uni_pipe::uni_mesg::UniMesg;
 
 #[test]
 fn it_works() {
@@ -13,7 +13,6 @@ fn it_works() {
 fn uni_pipe_functions_are_there() {
     assert_eq!(uni_pipe::host::collect_messages(), "it works");
 }
-
 
 
 #[cfg(test)]
@@ -28,6 +27,6 @@ fn can_send_and_receive() {
     client_messenger.send_message(msg);
 
     //check if message was send and received ok
-    let received_msg =  host_messenger.get_one_message();
+    let received_msg =  host_messenger.unwrap()get_one_message();
     assert_eq!(msg, received_msg);
 }
